@@ -7,6 +7,10 @@ import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +48,23 @@ public class SmokeTest extends Instrumentation {
             if (!"true".equals(eval(web, "['dm','search','photo','image','audio','message'].every(id=>getComputedStyle(document.getElementById(id)).display!=='none')"))) throw new AssertionError("chat controls hidden");
             eval(web, "history.pushState({},'', '/direct/t/123/'); location.pathname");
             if (!"\"/direct/t/123/\"".equals(eval(web, "location.pathname"))) throw new AssertionError("DM navigation broken");
-            result.putString("stream", "Passed Android WebView fixture checks: launch, script injection, distraction hiding, chat controls, DM SPA navigation, file-access policy, third-party cookie policy, backup disabled. No real Instagram account used.\n");
+            CountDownLatch backRequest = new CountDownLatch(1);
+            AtomicReference<String> destination = new AtomicReference<>();
+            runOnMainSync(() -> {
+                // Intercept the test's final navigation to avoid using the live
+                // service. Exercise the real Activity Back handler unchanged.
+                web.setWebViewClient(new WebViewClient() {
+                    @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap icon) {
+                        destination.set(url); backRequest.countDown();
+                    }
+                    @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                        return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream("<html>Inbox fixture</html>".getBytes()));
+                    }
+                });
+                activity.onBackPressed();
+            });
+            if (!backRequest.await(5, TimeUnit.SECONDS) || !"https://www.instagram.com/direct/inbox/".equals(destination.get())) throw new AssertionError("Android Back did not return to inbox: " + destination.get());
+            result.putString("stream", "Passed Android WebView fixture checks: launch, script injection, distraction hiding, chat controls, DM SPA navigation, Android Back to inbox, file-access policy, third-party cookie policy, backup disabled. No real Instagram account used.\n");
             finish(Activity.RESULT_OK, result);
         } catch (Throwable error) {
             result.putString("stream", "FAILED: " + error.toString() + "\n");

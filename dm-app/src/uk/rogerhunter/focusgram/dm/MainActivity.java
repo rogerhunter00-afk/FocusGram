@@ -197,8 +197,21 @@ public class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if (web == null) { super.onBackPressed(); return; }
-        String url = web.getUrl();
-        if (NavigationPolicy.direct(url) && !Uri.parse(url).getPath().equals("/direct/inbox/")) {
+        // SPA history updates can reach WebView.getUrl() after the JavaScript
+        // callback. Read the active document's URL before deciding where Back goes.
+        web.evaluateJavascript("location.href", value -> {
+            if (isFinishing()) return;
+            String current = web.getUrl();
+            try {
+                Object parsed = new org.json.JSONTokener(value).nextValue();
+                if (parsed instanceof String) current = (String) parsed;
+            } catch (Exception ignored) { }
+            handleBack(current);
+        });
+    }
+    private void handleBack(String url) {
+        String path = url == null ? "" : Uri.parse(url).getPath();
+        if (NavigationPolicy.direct(url) && !"/direct/inbox/".equals(path) && !"/direct/inbox".equals(path)) {
             web.loadUrl(NavigationPolicy.INBOX);
         } else if (!NavigationPolicy.direct(url) && web.canGoBack()) web.goBack();
         else super.onBackPressed();

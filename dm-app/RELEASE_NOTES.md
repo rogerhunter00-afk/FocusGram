@@ -23,7 +23,7 @@ Instagram login/session data stays in the app's private storage on the phone, wi
 
 - Release APK built, signed, signature/alignment verified, and installed in an Android 10 emulator.
 - All 24 Java routing tests passed; Chromium fixture tests passed.
-- Real Android WebView fixture tests passed for script injection, navigation hiding, preserved chat controls, DM navigation and storage policy.
+- Real Android WebView fixture tests passed for script injection, navigation hiding, preserved chat controls, DM navigation, Android Back to the inbox and storage policy.
 - Instagram's public login screen rendered and cookie choice persisted across a full app restart. The emulator's old WebView showed a browser-version warning; actual login/messages remain unverified.
 
 See [the complete test report](https://github.com/rogerhunter00-afk/FocusGram/blob/dm-v1.0.0/dm-app/TEST_REPORT.md) and [source/build instructions](https://github.com/rogerhunter00-afk/FocusGram/tree/dm-v1.0.0/dm-app). APK SHA-256 is included in `SHA256SUMS.txt`.
