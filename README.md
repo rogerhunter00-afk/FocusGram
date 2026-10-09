@@ -2,7 +2,15 @@
 
 <img src="assets/images/focusgram.png" alt="FocusGram" width="96" height="96" />
 
-# FocusGram
+# FocusGram DMs — this fork
+
+This fork publishes a small **DM-only Android app**. [Download the APK](https://github.com/rogerhunter00-afk/FocusGram/releases/tag/dm-v1.0.0) and see [installation instructions, supported features, limitations and build source](dm-app/README.md).
+
+**Background message notifications and calls are not supported. Photos and voice messages depend on Instagram's web support and still need a logged-in account check.** The DM app's source is in `dm-app/`; it does not include the original Flutter app's ads or additional features. AGPL-3.0 and upstream attribution are retained.
+
+The original upstream README follows for reference. Its download links/features describe upstream FocusGram, not this fork's DM APK.
+
+# FocusGram (upstream)
 
 **Use social media on your terms.**
 
